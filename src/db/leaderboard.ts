@@ -20,3 +20,5 @@ export const createLeaderboardRow = (values: Record<string, any>) => new Leaderb
 export const getLeaderboard = () => LeaderboardModel.find();
 
 export const getLeaderboardRowsByEmail = (email:String) => LeaderboardModel.find({username: email});
+
+export const updateHighScoreByID = (id:String, score:Number) => LeaderboardModel.findByIdAndUpdate(id, {score: score});

@@ -1,7 +1,7 @@
 import {Request, Response} from "express";
 import {createUser, getUserByEmail, getUserBySessionToken, getUsers} from "../db/users";
 import {authentication, random} from "../helpers";
-import {createLeaderboardRow, getLeaderboard, getLeaderboardRowsByEmail} from "../db/leaderboard";
+import {createLeaderboardRow, getLeaderboard, getLeaderboardRowsByEmail, updateHighScoreByID} from "../db/leaderboard";
 import {forEach} from "lodash";
 
 
@@ -13,20 +13,26 @@ export const addLeaderboardScore = async (req:Request, res:Response)=> {
             res.sendStatus(400);
             return;
         }
+        const rows:Array<any> = await getLeaderboardRowsByEmail(username);
 
-        const leaderboarRow = await createLeaderboardRow(
-            {
-                username,
-                gamemode,
-                difficulty,
-                generations,
-                correctGuesses,
-                score
-            }
-        )
-
-        res.status(200).json(leaderboarRow);
-        return;
+        if (rows.length == 0) {
+            const leaderboardRow = await createLeaderboardRow(
+                {
+                    username,
+                    gamemode,
+                    difficulty,
+                    generations,
+                    correctGuesses,
+                    score
+                }
+            )
+            res.status(200).json(leaderboardRow);
+            return;
+        } else {
+            await updateHighScoreByID(rows[0]._id.toString(), score);
+            res.status(200).json(rows);
+            return;
+        }
 
     } catch (error) {
         console.log(error)
